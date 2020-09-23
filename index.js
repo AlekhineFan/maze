@@ -1,7 +1,9 @@
 const { Engine, Render, Runner, World, Bodies } = Matter;
-const cells = 3;
-const width = 600;
-const height = 600;
+const cells = 30;
+const width = 800;
+const height = 800;
+const unitLength = width / cells;
+
 const engine = Engine.create();
 const { world } = engine;
 const render = Render.create({
@@ -98,3 +100,39 @@ const stepCell = (row, col) => {
 };
 
 stepCell(startRow, startCol);
+
+horizontals.forEach((row, rowIdx) => {
+  row.forEach((open, colIdx) => {
+    if (open) {
+      return;
+    }
+    const wall = Bodies.rectangle(
+      colIdx * unitLength + unitLength / 2,
+      rowIdx * unitLength + unitLength,
+      unitLength,
+      5,
+      {
+        isStatic: true,
+      }
+    );
+    World.add(world, wall);
+  });
+});
+
+verticals.forEach((row, rowIdx) => {
+  row.forEach((open, colIdx) => {
+    if (open) {
+      return;
+    }
+    const wall = Bodies.rectangle(
+      colIdx * unitLength + unitLength,
+      rowIdx * unitLength + unitLength / 2,
+      5,
+      unitLength,
+      {
+        isStatic: true,
+      }
+    );
+    World.add(world, wall);
+  });
+});
