@@ -1,10 +1,11 @@
-const { Engine, Render, Runner, World, Bodies } = Matter;
-const cells = 30;
-const width = 800;
-const height = 800;
+const { Engine, Render, Runner, World, Bodies, Body } = Matter;
+const cells = 3;
+const width = 600;
+const height = 600;
 const unitLength = width / cells;
 
 const engine = Engine.create();
+engine.world.gravity.y = 0;
 const { world } = engine;
 const render = Render.create({
   element: document.body,
@@ -17,10 +18,10 @@ Runner.run(Runner.create(), engine);
 //walls
 
 const walls = [
-  Bodies.rectangle(width / 2, 0, width, 40, { isStatic: true }),
-  Bodies.rectangle(width / 2, height, width, 40, { isStatic: true }),
-  Bodies.rectangle(0, height / 2, 40, height, { isStatic: true }),
-  Bodies.rectangle(width, height / 2, 40, height, { isStatic: true }),
+  Bodies.rectangle(width / 2, 0, width, 2, { isStatic: true }),
+  Bodies.rectangle(width / 2, height, width, 2, { isStatic: true }),
+  Bodies.rectangle(0, height / 2, 2, height, { isStatic: true }),
+  Bodies.rectangle(width, height / 2, 2, height, { isStatic: true }),
 ];
 World.add(world, walls);
 
@@ -135,4 +136,39 @@ verticals.forEach((row, rowIdx) => {
     );
     World.add(world, wall);
   });
+});
+
+//goal to reach
+
+const goal = Bodies.rectangle(
+  width - unitLength / 2,
+  height - unitLength / 2,
+  unitLength * 0.7,
+  unitLength * 0.7,
+  {
+    isStatic: true,
+  }
+);
+World.add(world, goal);
+
+//ball
+
+const ball = Bodies.circle(unitLength / 2, unitLength / 2, unitLength / 4);
+World.add(world, ball);
+
+document.addEventListener("keydown", (event) => {
+  const { x, y } = ball.velocity;
+  if (event.key === "ArrowUp") {
+    Body.setVelocity(ball, { x, y: y - 5 });
+  }
+  if (event.key === "ArrowDown") {
+    Body.setVelocity(ball, { x, y: y + 5 });
+  }
+  if (event.key === "ArrowRight") {
+    Body.setVelocity(ball, { x: x + 5, y });
+  }
+  if (event.key === "ArrowLeft") {
+    Body.setVelocity(ball, { x: x - 5, y });
+  }
+  console.log(event.key);
 });
