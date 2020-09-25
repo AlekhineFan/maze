@@ -1,8 +1,10 @@
 const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
-const cells = 3;
-const width = 600;
-const height = 600;
-const unitLength = width / cells;
+const cellsHorizontal = 14;
+const cellsVertical = 10;
+const width = window.innerWidth;
+const height = window.innerHeight;
+const unitLengthX = width / cellsHorizontal;
+const unitLengthY = height / cellsVertical;
 
 const engine = Engine.create();
 engine.world.gravity.y = 0;
@@ -40,20 +42,20 @@ const shuffle = (arr) => {
   return arr;
 };
 
-const grid = Array(cells)
+const grid = Array(cellsVertical)
   .fill(null)
-  .map(() => Array(cells).fill(false));
+  .map(() => Array(cellsHorizontal).fill(false));
 
-const verticals = Array(cells)
+const verticals = Array(cellsVertical)
   .fill(null)
-  .map(() => Array(cells - 1).fill(false));
+  .map(() => Array(cellsHorizontal - 1).fill(false));
 
-const horizontals = Array(cells - 1)
+const horizontals = Array(cellsVertical - 1)
   .fill(null)
-  .map(() => Array(cells).fill(false));
+  .map(() => Array(cellsHorizontal).fill(false));
 
-const startRow = Math.floor(Math.random() * cells);
-const startCol = Math.floor(Math.random() * cells);
+const startRow = Math.floor(Math.random() * cellsVertical);
+const startCol = Math.floor(Math.random() * cellsHorizontal);
 
 console.log(startRow, startCol);
 
@@ -77,7 +79,12 @@ const stepCell = (row, col) => {
   for (let neighbour of neighbours) {
     //See if that neighbour is out of bounds
     const [nextRow, nextCol, direction] = neighbour;
-    if (nextRow < 0 || nextRow >= cells || nextCol < 0 || nextCol >= cells) {
+    if (
+      nextRow < 0 ||
+      nextRow >= cellsVertical ||
+      nextCol < 0 ||
+      nextCol >= cellsHorizontal
+    ) {
       continue;
     }
     //if we have visited that neighbour, continue to next neighbour
@@ -108,11 +115,12 @@ horizontals.forEach((row, rowIdx) => {
       return;
     }
     const wall = Bodies.rectangle(
-      colIdx * unitLength + unitLength / 2,
-      rowIdx * unitLength + unitLength,
-      unitLength,
+      colIdx * unitLengthX + unitLengthX / 2,
+      rowIdx * unitLengthY + unitLengthY,
+      unitLengthX,
       5,
       {
+        label: "wall",
         isStatic: true,
       }
     );
@@ -126,11 +134,12 @@ verticals.forEach((row, rowIdx) => {
       return;
     }
     const wall = Bodies.rectangle(
-      colIdx * unitLength + unitLength,
-      rowIdx * unitLength + unitLength / 2,
+      colIdx * unitLengthX + unitLengthX,
+      rowIdx * unitLengthY + unitLengthY / 2,
       5,
-      unitLength,
+      unitLengthY,
       {
+        label: "wall",
         isStatic: true,
       }
     );
@@ -141,10 +150,10 @@ verticals.forEach((row, rowIdx) => {
 //goal to reach
 
 const goal = Bodies.rectangle(
-  width - unitLength / 2,
-  height - unitLength / 2,
-  unitLength * 0.7,
-  unitLength * 0.7,
+  width - unitLengthX / 2,
+  height - unitLengthY / 2,
+  unitLengthX * 0.7,
+  unitLengthY * 0.7,
   {
     label: "goal",
     isStatic: true,
@@ -153,8 +162,8 @@ const goal = Bodies.rectangle(
 World.add(world, goal);
 
 //ball
-
-const ball = Bodies.circle(unitLength / 2, unitLength / 2, unitLength / 4, {
+const ballRadius = Math.min(unitLengthX, unitLengthY) / 4;
+const ball = Bodies.circle(unitLengthX / 2, unitLengthX / 2, ballRadius, {
   label: "ball",
 });
 World.add(world, ball);
@@ -175,7 +184,7 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-//condition of winning
+//condition of winning, win animation
 
 Events.on(engine, "collisionStart", (ev) => {
   ev.pairs.forEach((collision) => {
@@ -184,7 +193,12 @@ Events.on(engine, "collisionStart", (ev) => {
       labels.includes(collision.bodyA.label) &&
       labels.includes(collision.bodyB.label)
     ) {
-      console.log("User won!");
+      world.gravity.y = 1;
+      world.bodies.forEach((body) => {
+        if (body.label === "wall") {
+          Body.setStatic(body, false);
+        }
+      });
     }
   });
 });
