@@ -32,9 +32,17 @@
     </style>
   </head>
   <body>
-    <div class="winner hidden">
+    <span class="winner hidden">
       <h1>You won!</h1>
-    </div>
+      <a href="javascript:location.reload(true)">
+        <button
+          id="play-again"
+          style="width: 10vh; height: 7vh; margin-left: 30px"
+        >
+          Play again
+        </button>
+      </a>
+    </span>
   </body>
   <script src="index.js"></script>
 </html>
